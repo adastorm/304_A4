@@ -20,17 +20,15 @@
 
 
     <?php
-    $file = fopen("Text_Files/KJV12.TXT", "r");
-    $thesaurus = fopen("Text_Files/LinuxThesaurus.txt","r");
+    $file = fopen("KJV12.TXT", "r");
+    $thesaurus = fopen("LinuxThesaurus.txt", "r");
 
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         $term = $_POST["searchTerm"];
-       
-    }
-    else if($_SERVER["REQUEST_METHOD"] == "GET"){
+    } else if ($_SERVER["REQUEST_METHOD"] == "GET") {
         $term = $_GET["searchTerm"];
-    }   
+    }
 
     $results = "";
     $book = "";
@@ -55,18 +53,16 @@
         }
     }
     //Search for thesaurus terms
-     echo "<h5>These are synonims for :  ".$term."</h5>";
-    while (!feof($thesaurus))
-    {
+    echo "<h5>These are synonims for :  " . $term . "</h5>";
+    while (!feof($thesaurus)) {
         $line = fgets($thesaurus);
-        
-            if(substr($line,0,strlen($term)+1) == $term.",")
-            {
-            $exploded = explode(",",$line);
-            for ($i=1; $i < sizeof($exploded) ; $i++) { 
-                echo '<a href="\index.php?searchTerm='.$exploded[$i].'">'.$exploded[$i].", </a>";
+
+        if (substr($line, 0, strlen($term) + 1) == $term . ",") {
+            $exploded = explode(",", $line);
+            for ($i = 1; $i < sizeof($exploded); $i++) {
+                echo '<a href="\index.php?searchTerm=' . $exploded[$i] . '">' . $exploded[$i] . ", </a>";
             }
-        }   
+        }
     }
 
     //Print out thesaurus variable.
