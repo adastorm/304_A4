@@ -21,30 +21,60 @@
 
     <?php
     $file = fopen("Text_Files/KJV12.TXT", "r");
-
+    $thesaurus = fopen("Text_Files/LinuxThesaurus.txt","r");
 
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         $term = $_POST["searchTerm"];
-        echo "Search results for: ".$term;
-        $results = "";
-        $book = "";
-
-        while (!feof($file)) {
-            $line = fgets($file);
-
-            $switch = false;
-
-            if(strpos("Book",substr($line,0,3)) !== false) $book = substr($line,7,strlen($line));
-            for ($i=0; $i < strlen($line) ; $i++) { 
-                if(stripos($term, substr($line,$i,strlen($term))) !== false) $switch = true;
-            }
-            if($switch)
-                $results = $results . '<br><br><div id="Book">' . $book . "</div> " . $line;
-        }
-        echo $results;
-        echo "<br><br>"."End of results for ".$term;
+       
     }
+    else if($_SERVER["REQUEST_METHOD"] == "GET"){
+        $term = $_GET["searchTerm"];
+    }   
+
+    $results = "";
+    $book = "";
+    $searchingString = "";
+    $resultCounter = 0;
+
+    //Search for terms in bible
+    while (!feof($file)) {
+        $line = fgets($file);
+
+        if (strpos($line, "Book") !== false) $book = substr($line, 8, strlen($line));
+
+        if (strlen($line) != 2) {
+            $searchingString = $searchingString . $line;
+        } else {
+            if (strpos($searchingString, " " . $term . " ") !== false) {
+                $searchingString = preg_replace("/" . $term . "/", '<span style="background-color: chartreuse; color:black;">' . $term . '</span>', $searchingString);
+                $results = $results . '<br><br><div id="Book">' . $book . ": " . $searchingString . "</div> ";
+                $resultCounter++;
+            }
+            $searchingString = "";
+        }
+    }
+    //Search for thesaurus terms
+     echo "<h5>These are synonims for :  ".$term."</h5>";
+    while (!feof($thesaurus))
+    {
+        $line = fgets($thesaurus);
+        
+            if(substr($line,0,strlen($term)+1) == $term.",")
+            {
+            $exploded = explode(",",$line);
+            for ($i=1; $i < sizeof($exploded) ; $i++) { 
+                echo '<a href="\index.php?searchTerm='.$exploded[$i].'">'.$exploded[$i].", </a>";
+            }
+        }   
+    }
+
+    //Print out thesaurus variable.
+
+    //Print out all of the search results
+    echo "<br>" . $resultCounter . " Results were found for the term " . $term;
+    echo "<div class = 'results'>" . $results . "</div>";
+    echo "<br><br>" . "End of results for " . $term;
     fclose($file);
 
     ?>
