@@ -23,10 +23,10 @@
     $file = fopen("KJV12.TXT", "r");
     $thesaurus = fopen("LinuxThesaurus.txt", "r");
 
-    if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
+    if (isset($_POST["searchTerm"])) {
         $term = $_POST["searchTerm"];
-    } else if ($_SERVER["REQUEST_METHOD"] == "GET") {
+    } else if (isset($_GET["searchTerm"])) {
         $term = $_GET["searchTerm"];
     }
 
@@ -36,35 +36,37 @@
     $resultCounter = 0;
 
     //Search for terms in bible
-    while (!feof($file)) {
-        $line = fgets($file);
+    if (isset($_GET["searchTerm"]) || isset($_POST["searchTerm"])) {
+        while (!feof($file)) {
 
-        if (strpos($line, "Book") !== false) $book = substr($line, 8, strlen($line));
+            $line = fgets($file);
 
-        if (strlen($line) != 2) {
-            $searchingString = $searchingString . $line;
-        } else {
-            if (strpos($searchingString, " " . $term . " ") !== false) {
-                $searchingString = preg_replace("/" . $term . "/", '<span style="background-color: chartreuse; color:black;">' . $term . '</span>', $searchingString);
-                $results = $results . '<br><br><div id="Book">' . $book . ": " . $searchingString . "</div> ";
-                $resultCounter++;
-            }
-            $searchingString = "";
-        }
-    }
-    //Search for thesaurus terms
-    echo "<h5>These are synonims for :  " . $term . "</h5>";
-    while (!feof($thesaurus)) {
-        $line = fgets($thesaurus);
+            if (strpos($line, "Book") !== false) $book = substr($line, 8, strlen($line));
 
-        if (substr($line, 0, strlen($term) + 1) == $term . ",") {
-            $exploded = explode(",", $line);
-            for ($i = 1; $i < sizeof($exploded); $i++) {
-                echo '<a href="\index.php?searchTerm=' . $exploded[$i] . '">' . $exploded[$i] . ", </a>";
+            if (strlen($line) != 2) {
+                $searchingString = $searchingString . $line;
+            } else {
+                if (strpos($searchingString, " " . $term . " ") !== false) {
+                    $searchingString = preg_replace("/" . $term . "/", '<span style="background-color: chartreuse; color:black;">' . $term . '</span>', $searchingString);
+                    $results = $results . '<br><br><div id="Book">' . $book . ": " . $searchingString . "</div> ";
+                    $resultCounter++;
+                }
+                $searchingString = "";
             }
         }
-    }
+        //Search for thesaurus terms
+        echo "<h5>These are synonims for :  " . $term . "</h5>";
+        while (!feof($thesaurus)) {
+            $line = fgets($thesaurus);
 
+            if (substr($line, 0, strlen($term) + 1) == $term . ",") {
+                $exploded = explode(",", $line);
+                for ($i = 1; $i < sizeof($exploded); $i++) {
+                    echo '<a href="\index.php?searchTerm=' . $exploded[$i] . '">' . $exploded[$i] . ", </a>";
+                }
+            }
+        }
+    }
     //Print out thesaurus variable.
 
     //Print out all of the search results
